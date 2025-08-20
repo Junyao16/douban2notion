@@ -110,16 +110,16 @@ def insert_movie(douban_name,notion_helper):
         if result.get("comment"):
             movie["短评"] = result.get("comment")
         if notion_movie_dict.get(movie.get("豆瓣链接")):
-            notion_movive = notion_movie_dict.get(movie.get("豆瓣链接"))
+            notion_movie = notion_movie_dict.get(movie.get("豆瓣链接"))
             if (
-                notion_movive.get("日期") != movie.get("日期")
-                or notion_movive.get("短评") != movie.get("短评")
-                or notion_movive.get("状态") != movie.get("状态")
-                or notion_movive.get("评分") != movie.get("评分")
-                or not notion_movive.get("演员")
-                or not notion_movive.get("IMDB")
+                notion_movie.get("日期") != movie.get("日期")
+                or notion_movie.get("短评") != movie.get("短评")
+                or notion_movie.get("状态") != movie.get("状态")
+                or notion_movie.get("评分") != movie.get("评分")
+                or not notion_movie.get("演员")
+                or not notion_movie.get("IMDB")
             ):
-                if not notion_movive.get("演员") and subject.get("actors"):
+                if not notion_movie.get("演员") and subject.get("actors"):
                     l = []
                     actors = subject.get("actors")[0:5]
                     for actor in actors:
@@ -134,13 +134,13 @@ def insert_movie(douban_name,notion_helper):
                         )
                         for x in actors
                     ]
-                if not notion_movive.get("IMDB"):
+                if not notion_movie.get("IMDB"):
                     movie["IMDB"] = get_imdb(movie.get("豆瓣链接"))
                 properties = utils.get_properties(movie, movie_properties_type_dict)
                 print(movie.get("电影名"))
                 notion_helper.get_date_relation(properties,create_time)
                 notion_helper.update_page(
-                    page_id=notion_movive.get("page_id"),
+                    page_id=notion_movie.get("page_id"),
                     properties=properties
             )
 
@@ -199,6 +199,16 @@ def get_imdb(link):
             if ('IMDb:' == span.string):
                 return span.next_sibling.string.strip()
 
+def get_ISBN(link):
+    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'}
+    response = requests.get(link, headers=headers)
+    soup = BeautifulSoup(response.content)
+    info = soup.find(id='info')
+    if info:
+        for span in info.find_all('span', {'class': 'pl'}):
+            if ('ISBN:' == span.string):
+                return span.next_sibling.string.strip()
+
 def insert_book(douban_name,notion_helper):
     notion_books = notion_helper.query_all(database_id=notion_helper.book_database_id)
     notion_book_dict = {}
@@ -235,17 +245,19 @@ def insert_book(douban_name,notion_helper):
         if result.get("comment"):
             book["短评"] = result.get("comment")
         if notion_book_dict.get(book.get("豆瓣链接")):
-            notion_movive = notion_book_dict.get(book.get("豆瓣链接"))
+            notion_book = notion_book_dict.get(book.get("豆瓣链接"))
             if (
-                notion_movive.get("日期") != book.get("日期")
-                or notion_movive.get("短评") != book.get("短评")
-                or notion_movive.get("状态") != book.get("状态")
-                or notion_movive.get("评分") != book.get("评分")
+                notion_book.get("日期") != book.get("日期")
+                or notion_book.get("短评") != book.get("短评")
+                or notion_book.get("状态") != book.get("状态")
+                or notion_book.get("评分") != book.get("评分")
+                or not notion_book.get("ISBN")
             ):
+                book["ISBN"] = get_imdb(book.get("豆瓣链接"))
                 properties = utils.get_properties(book, book_properties_type_dict)
                 notion_helper.get_date_relation(properties,create_time)
                 notion_helper.update_page(
-                    page_id=notion_movive.get("page_id"),
+                    page_id=notion_book.get("page_id"),
                     properties=properties
             )
 
