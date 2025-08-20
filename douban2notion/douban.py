@@ -254,7 +254,7 @@ def insert_book(douban_name,notion_helper):
                 or notion_book.get("评分") != book.get("评分")
                 or not notion_book.get("ISBN")
             ):
-                book["ISBN"] = get_imdb(book.get("豆瓣链接"))
+                book["ISBN"] = get_ISBN(book.get("豆瓣链接"))
                 properties = utils.get_properties(book, book_properties_type_dict)
                 notion_helper.get_date_relation(properties,create_time)
                 notion_helper.update_page(
