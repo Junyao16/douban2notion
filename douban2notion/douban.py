@@ -221,6 +221,7 @@ def insert_book(douban_name,notion_helper):
             "状态": book.get("状态"),
             "日期": book.get("日期"),
             "评分": book.get("评分"),
+            "ISBN": movie.get("ISBN"),
             "page_id": i.get("id")
         }
     print(f"notion {len(notion_book_dict)}")
