@@ -19,7 +19,6 @@ jobs:
         YEAR: ${{ vars.YEAR }}
         REF: ${{ github.ref }}
         REPOSITORY: ${{ github.repository }}
-        DATABASE_ID: ${{ secrets.MOVIE_DATABASE_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3

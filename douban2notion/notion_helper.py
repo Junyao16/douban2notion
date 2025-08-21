@@ -85,7 +85,10 @@ class NotionHelper:
         )
         if self.day_database_id:
             self.write_database_id(self.day_database_id)
-        self.update_movie_database()
+        if is_movie:
+            self.update_movie_database()
+        else:
+            self.update_book_database()
 
     def write_database_id(self, database_id):
         env_file = os.getenv('GITHUB_ENV')
@@ -196,6 +199,26 @@ class NotionHelper:
         if len(update_properties) > 0:
             self.client.databases.update(database_id=id, properties=update_properties)
     
+    def update_book_database(self):
+        """更新数据库"""
+        response = self.client.databases.retrieve(database_id=self.book_database_id)
+        id = response.get("id")
+        properties = response.get("properties")
+        update_properties = {}
+        if (
+            properties.get("作者") is None
+            or properties.get("作者").get("type") != "relation"
+        ):
+            update_properties["作者"] = {"relation": {"database_id": self.author_database_id,"dual_property":{}}}
+        if (
+            properties.get("ISBN") is None
+            or properties.get("ISBN").get("type") != "rich_text"
+        ):
+            update_properties["ISBN"] = {"rich_text": {}}
+        if len(update_properties) > 0:
+            self.client.databases.update(database_id=id, properties=update_properties)
+
+
     @retry(stop_max_attempt_number=3, wait_fixed=5000)
     def get_relation_id(self, name, id, icon, properties={}):
         key = f"{id}{name}"
